@@ -1,17 +1,20 @@
 # 📝 Task Tracker API
 
-A simple yet well-structured **RESTful API for task management**, built using **Spring Boot** and **PostgreSQL**. This project demonstrates clean architecture, request validation, custom error handling, Swagger documentation, and unit testing with JUnit 5 + Mockito.
+A clean, secure and modular **RESTful API for task management**, built with **Spring Boot**, **JWT authentication**, and **PostgreSQL**. This project demonstrates clean architecture, custom validation, role-based authorization, Swagger documentation, and unit testing with JUnit 5 + Mockito.
 
 ---
 
 ## 🚀 Features
 
-- ✅ CRUD operations for tasks
+- ✅ JWT-based authentication with login & registration
+- ✅ Role-based access control (`USER` & `ADMIN`)
+- ✅ Task CRUD operations with ownership validation
 - ✅ Request validation with `@Valid`
-- ✅ Custom error responses using `@ControllerAdvice`
-- ✅ OpenAPI (Swagger UI) documentation
-- ✅ Persistence with PostgreSQL
-- ✅ Unit tests for service and controller layers
+- ✅ Global error handling using `@ControllerAdvice`
+- ✅ Swagger UI with grouped endpoints and security
+- ✅ PostgreSQL persistence
+- ✅ Secure config via `.env` and dotenv loader
+- ✅ Unit testing (service & controller layers)
 
 ---
 
@@ -19,11 +22,12 @@ A simple yet well-structured **RESTful API for task management**, built using **
 
 - Java 21
 - Spring Boot 3.2.5
+- Spring Security + JWT (JJWT)
 - Spring Data JPA
 - Spring Validation
 - Springdoc OpenAPI
 - PostgreSQL
-- JUnit 5 & Mockito
+- JUnit 5 + Mockito
 
 ---
 
@@ -36,61 +40,66 @@ CREATE DATABASE tasktracker;
 CREATE USER task_user WITH PASSWORD 'secret123';
 GRANT ALL PRIVILEGES ON DATABASE tasktracker TO task_user;
 ```
-### 2. Configure application.yml
+### 2. Configure .env file
 
-```yml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/tasktracker
-    username: task_user
-    password: secret123
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+```.env
+JWT_SECRET=MySuperSecretKeyThatIsSecureEnough123!
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/tasktracker
+SPRING_DATASOURCE_USERNAME=task_user
+SPRING_DATASOURCE_PASSWORD=secret123
 ```
+✅ The application loads these using DotenvInitializer.
 
-### 3. Run the project
+### 3. Run the application
 ```bash
    ./mvnw spring-boot:run
    ```
 ### 4. Open Swagger UI
    Visit: http://localhost:8080/swagger-ui.html
+   Use the "Authorize" button to test protected endpoints with JWT.
 
-### ✅ API Endpoints
+### 🔐 Authentication Endpoints
 ```Method	Endpoint	Description
-POST	/tasks	Create a new task
-GET	/tasks	List all tasks
-PUT	/tasks/{id}	Update a task
-PATCH	/tasks/{id}/done	Mark task as done
-PATCH	/tasks/{id}/in-progress	Mark task in progress
-DELETE	/tasks/{id}	Delete a task
+POST	/auth/register	Register new user
+POST	/auth/login	Login and receive JWT token
 ```
+### ✅ Task Endpoints
+``` Method	Endpoint	Description
+POST	/tasks	Create task (for current user)
+GET	/tasks	Get own tasks (filtered by status optional)
+GET	/tasks/by-user/{email}	Get tasks by user (ADMIN only)
+PUT	/tasks/{id}	Update task (admin or owner)
+PATCH	/tasks/{id}/done	Mark task as done
+PATCH	/tasks/{id}/in-progress	Mark task as in progress
+DELETE	/tasks/{id}	Delete task (admin or owner)
+ ```
 ### 🧪 Running Tests
 ```bash
 ./mvnw test
 ```
-All core logic is covered by unit tests for both service and controller layers.
+✅ Unit tests included for TaskService, UserService, and JWT logic.
 
 ### 📁 Project Structure
 ```csharp
 com.saparbek.Task_Tracker
-├── controller        # REST endpoints
-├── dto               # Request/response models
-├──  exception         # Global error handling
-├── model             # JPA entities
-├── repository        # Spring Data repositories
-├── service           # Business logic
+├── config             # Security, Swagger, Dotenv initializer
+├── controller         # REST endpoints
+├── dto                # Request/response models
+├── exception          # Global error handling
+├── model              # JPA entities & enums
+├── repository         # Spring Data repositories
+├── security           # JWT, custom auth, RBAC
+├── service            # Business logic
 ```
 ### 📌 Author
 ### Saparbek Kozhanazar
 Feel free to contribute, fork, or raise issues!
+
+### 📄 License
+This project is open-source and free to use under the MIT License.
+
+---
+Let me know if you'd like:
+- a badge for build/test status
+- example cURL requests for login + token use
+- frontend suggestions (React/Vue) that match this API setup
